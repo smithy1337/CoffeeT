@@ -12,15 +12,22 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.text.NumberFormat;
 import java.util.Date;
 import java.util.TimerTask;
 import javax.swing.ImageIcon;
+import javax.swing.JFormattedTextField;
+import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JSpinner;
 import javax.swing.SpinnerDateModel;
+import javax.swing.text.NumberFormatter;
+
 import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
 import javafx.animation.Timeline;
@@ -29,6 +36,7 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.Group;
+import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
@@ -36,6 +44,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.control.Spinner;
 import javafx.scene.control.SpinnerValueFactory;
+import javafx.scene.control.TextField;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
@@ -64,19 +73,22 @@ public class SpinnerOne extends Application {
     	
     	createAndShowGUI();
     	Label label = new Label("Select Minutes to next Coffee: ");
-        final Spinner<Integer> spinner = new Spinner<Integer>();
- 
-        final int initialValue = 60;
-        
-        // Value factory.
-        SpinnerValueFactory<Integer> valueFactory = 
-                new SpinnerValueFactory.IntegerSpinnerValueFactory(1, 9999, initialValue);
- 
-        spinner.setValueFactory(valueFactory);     
+    	
+    	
+    	
+//        final Spinner<Integer> spinner = new Spinner<Integer>();
+//        final int initialValue = 60;
+//        // Value factory.
+//        SpinnerValueFactory<Integer> valueFactory = 
+//                new SpinnerValueFactory.IntegerSpinnerValueFactory(1, 9999, initialValue);
+// 
+//        spinner.setValueFactory(valueFactory);     
         
         Button okBtn = new Button("OK");
         
-
+        TextField t1 = new TextField();
+        
+        
         ObservableList<String> boxlist = 
         	FXCollections.observableArrayList(
         			"Non Transparent",
@@ -104,7 +116,7 @@ public class SpinnerOne extends Application {
         root.setVgap(10);
         root.setPadding(new Insets(10));
         
-        root.getChildren().addAll(label, spinner, okBtn, cbox, cbox2);
+        root.getChildren().addAll(label, okBtn, t1, cbox, cbox2);
 
         cbox.setVisible(true);
  
@@ -114,13 +126,21 @@ public class SpinnerOne extends Application {
         stage.setScene(scene);
         stage.show();    
         
-        okBtn.setOnMouseClicked((event) -> {      	
-        	STARTTIME = spinner.getValue() *60;
+        okBtn.setOnMouseClicked((event) -> {   
+        	String t1t = t1.getText();
+        	if(t1t.matches("[0-9]+")){
+        	STARTTIME = Integer.parseInt(t1t) *60;
         	stage.hide();     	
-            cboxSelect = cbox.getValue().toString();
-            alignment = cbox2.getValue().toString();
-            Stage stage2 = new Stage();
-            load(stage2, cboxSelect, alignment);
+        	cboxSelect = cbox.getValue().toString();
+        	alignment = cbox2.getValue().toString();
+        	Stage stage2 = new Stage();
+        	load(stage2, cboxSelect, alignment);
+        	}
+        	else {
+        		String errordigits = "Input may only contain Numbers!";
+        		    JOptionPane.showMessageDialog(new JFrame(), errordigits, "Dialog",
+        		        JOptionPane.ERROR_MESSAGE);
+        	}
         });
         
     }
@@ -198,8 +218,7 @@ public class SpinnerOne extends Application {
         NotAus.setOnMouseClicked((event) -> {
         	System.exit(0);
         });
-        
-        
+         
         new java.util.Timer().schedule(new TimerTask(){
             @Override
             public void run() {         
