@@ -14,18 +14,30 @@ import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.text.NumberFormat;
 import java.util.Date;
 import java.util.TimerTask;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+import application.PlainTextEmailSender;
+
+import javax.mail.MessagingException;
+import javax.mail.internet.AddressException;
 import javax.swing.ImageIcon;
 import javax.swing.JFormattedTextField;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JSpinner;
 import javax.swing.SpinnerDateModel;
+import javax.swing.Timer;
+import javax.swing.WindowConstants;
 import javax.swing.text.NumberFormatter;
 
 import at.bachmann.te.TETasks;
@@ -36,6 +48,7 @@ import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
 import javafx.animation.Timeline;
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.geometry.Rectangle2D;
@@ -71,18 +84,22 @@ public class SpinnerOne extends Application {
 	private int STARTTIME;
 	private Timeline timeline;
 	private Label timerLabel = new Label();
+	private JLabel runTextLabel = new JLabel();
 	private IntegerProperty timeSeconds = new SimpleIntegerProperty(STARTTIME * 100);
 	private String cboxSelect = "";
 	private String alignment = "";
 	private String size = "";
 	private int SVITime = 0;
 	private boolean TimerRunning = false;
+	static int counter = 0;
+	static ScheduledExecutorService service;
 
 	@Override
 	public void start(Stage stage) {
 
 		createAndShowGUI();
 		Label label = new Label("Select Minutes to next Coffee: ");
+		label.setTextFill(Color.DARKBLUE);
 		Button okBtn = new Button("OK");
 
 		TextField t1 = new TextField();
@@ -109,31 +126,19 @@ public class SpinnerOne extends Application {
 		root.setHgap(10);
 		root.setVgap(10);
 		root.setPadding(new Insets(10));
-		root.setId("pane");
 
-		root.getChildren().addAll(label, okBtn, t1, cbox, cbox2, cbox3);
+		root.getChildren().addAll(label, t1, okBtn, cbox, cbox2, cbox3);
 
 		cbox.setVisible(true);
 
-		Scene scene = new Scene(root, 300, 150);
+		Scene scene = new Scene(root, 450, 130);
 		root.setStyle("-fx-background-image: url(\"images/coffeebg.jpg\")");
 		stage.setTitle("Pick Time in minutes");
 		stage.setScene(scene);
 		stage.setResizable(false);
 		stage.show();
-		
-//		try {
-//			TETasks te = buildTET("10.208.64.51");
-//
-//			while (te.sviTasks().read("COFFEESE/timerRunning").equals("1")) {
-//				String st1 = (te.sviTasks().read("COFFEESE/timer"));
-//				t1.setText(st1);
-//			}
-//			te.destroy();
-//		} catch (TEException e) {
-//			e.printStackTrace();
-//		}
-		
+		stage.setOnCloseRequest(e -> System.exit(0));
+
 		okBtn.setOnMouseClicked((event) -> {
 			String t1t = t1.getText();
 			if (t1t.matches("[0-9]+")) {
@@ -265,22 +270,29 @@ public class SpinnerOne extends Application {
 				}
 			}
 		}, 1000 * STARTTIME, 1000 * STARTTIME);
+		
+		new java.util.Timer().schedule(new TimerTask() {
+			@Override
+			public void run() {
+				PlainTextEmailSender sender = new PlainTextEmailSender();
+				try {
+					sender.sendPlainTextEmail("kevin.eberl@bachmann.info", "ALERT! COFFEE TIMER EXPIRING IN 1 MINUTE!");
+					sender.sendPlainTextEmail("christopher.schmidt@bachmann.info", "ALERT! COFFEE TIMER EXPIRING IN 1 MINUTE!");
+					sender.sendPlainTextEmail("patrick.lins@bachmann.info", "ALERT! COFFEE TIMER EXPIRING IN 1 MINUTE!");
+					System.out.println("Email sent.");
+				} catch (AddressException e) {
+					System.out.println("Failed to send email.");
+					e.printStackTrace();
+				} catch (MessagingException e) {
+					System.out.println("Failed to send email.");
+					e.printStackTrace();
+				}
+			}
+		}, 1000 * (STARTTIME - 60), 1000 * (STARTTIME - 60));
 
 		new java.util.Timer().schedule(new TimerTask() {
 			@Override
 			public void run() {
-				java.awt.Toolkit.getDefaultToolkit().beep();
-				java.awt.Toolkit.getDefaultToolkit().beep();
-				java.awt.Toolkit.getDefaultToolkit().beep();
-				java.awt.Toolkit.getDefaultToolkit().beep();
-				java.awt.Toolkit.getDefaultToolkit().beep();
-				java.awt.Toolkit.getDefaultToolkit().beep();
-				java.awt.Toolkit.getDefaultToolkit().beep();
-				java.awt.Toolkit.getDefaultToolkit().beep();
-				java.awt.Toolkit.getDefaultToolkit().beep();
-				java.awt.Toolkit.getDefaultToolkit().beep();
-				java.awt.Toolkit.getDefaultToolkit().beep();
-				java.awt.Toolkit.getDefaultToolkit().beep();
 				java.awt.Toolkit.getDefaultToolkit().beep();
 			}
 		}, 1000 * (STARTTIME - 3), 1000 * (STARTTIME - 3));
@@ -289,18 +301,6 @@ public class SpinnerOne extends Application {
 			@Override
 			public void run() {
 				java.awt.Toolkit.getDefaultToolkit().beep();
-				java.awt.Toolkit.getDefaultToolkit().beep();
-				java.awt.Toolkit.getDefaultToolkit().beep();
-				java.awt.Toolkit.getDefaultToolkit().beep();
-				java.awt.Toolkit.getDefaultToolkit().beep();
-				java.awt.Toolkit.getDefaultToolkit().beep();
-				java.awt.Toolkit.getDefaultToolkit().beep();
-				java.awt.Toolkit.getDefaultToolkit().beep();
-				java.awt.Toolkit.getDefaultToolkit().beep();
-				java.awt.Toolkit.getDefaultToolkit().beep();
-				java.awt.Toolkit.getDefaultToolkit().beep();
-				java.awt.Toolkit.getDefaultToolkit().beep();
-				java.awt.Toolkit.getDefaultToolkit().beep();
 			}
 		}, 1000 * (STARTTIME - 2), 1000 * (STARTTIME - 2));
 
@@ -308,18 +308,7 @@ public class SpinnerOne extends Application {
 			@Override
 			public void run() {
 				java.awt.Toolkit.getDefaultToolkit().beep();
-				java.awt.Toolkit.getDefaultToolkit().beep();
-				java.awt.Toolkit.getDefaultToolkit().beep();
-				java.awt.Toolkit.getDefaultToolkit().beep();
-				java.awt.Toolkit.getDefaultToolkit().beep();
-				java.awt.Toolkit.getDefaultToolkit().beep();
-				java.awt.Toolkit.getDefaultToolkit().beep();
-				java.awt.Toolkit.getDefaultToolkit().beep();
-				java.awt.Toolkit.getDefaultToolkit().beep();
-				java.awt.Toolkit.getDefaultToolkit().beep();
-				java.awt.Toolkit.getDefaultToolkit().beep();
-				java.awt.Toolkit.getDefaultToolkit().beep();
-				java.awt.Toolkit.getDefaultToolkit().beep();
+				//timerLabel.setStyle("-fx-font-size: 300em;");
 			}
 		}, 1000 * (STARTTIME - 1), 1000 * (STARTTIME - 1));
 	}
